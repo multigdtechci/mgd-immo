@@ -1,0 +1,7 @@
+# robots.txt : MGD Immo
+# Autorise tous les moteurs de recherche a explorer le site
+
+User-agent: *
+Allow: /
+
+Sitemap: https://mgd-immo.vercel.app/sitemap.xml
