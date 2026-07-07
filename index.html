@@ -1366,6 +1366,50 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);padding:64px 24px 28px}
   .adm-sb-close{display:flex !important}
 }
 .adm-sb-close{display:none;width:100%;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:white;border:none;border-radius:10px;padding:10px;font-weight:700;margin-bottom:14px;cursor:pointer;font-family:inherit}
+
+/* --- POPUP ALERTES (carre, ancre a droite) --- */
+.sub-popup-overlay{
+  position:fixed;inset:0;background:rgba(10,20,50,.55);backdrop-filter:blur(3px);
+  z-index:2000;display:none;align-items:center;justify-content:flex-end;
+  padding:24px;opacity:0;transition:opacity .3s ease;
+}
+.sub-popup-overlay.open{display:flex;opacity:1}
+.sub-popup-panel{
+  width:100%;max-width:420px;max-height:90vh;overflow-y:auto;
+  border-radius:20px;position:relative;
+  transform:translateX(40px);transition:transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.sub-popup-overlay.open .sub-popup-panel{transform:translateX(0)}
+.sub-popup-close{
+  position:absolute;top:14px;right:14px;z-index:3;
+  width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.12);color:white;font-size:1.05rem;
+  display:flex;align-items:center;justify-content:center;transition:var(--tr);
+}
+.sub-popup-close:hover{background:rgba(255,255,255,.25);transform:rotate(90deg)}
+.sub-popup-panel .sub-strip{border-radius:20px;padding:40px 26px}
+.sub-popup-panel .sub-inner{text-align:left}
+.sub-popup-panel .sub-badge,
+.sub-popup-panel .sub-chips{justify-content:flex-start}
+.sub-popup-panel .sub-form{flex-direction:column;max-width:100%}
+.sub-popup-panel .sub-input{width:100%}
+.sub-popup-panel .sub-btn{width:100%;justify-content:center;display:flex;align-items:center}
+.sub-popup-panel .sub-strip h2{font-size:1.55rem}
+
+/* Bouton flottant pour rouvrir le popup manuellement */
+.sub-fab{
+  position:fixed;bottom:24px;right:24px;z-index:900;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),var(--orange2));color:white;
+  font-size:1.3rem;box-shadow:0 8px 24px rgba(242,101,34,.45);
+  display:flex;align-items:center;justify-content:center;transition:var(--tr);
+}
+.sub-fab:hover{transform:scale(1.08)}
+.sub-fab.hide{display:none}
+@media(max-width:600px){
+  .sub-popup-overlay{padding:14px;align-items:flex-end}
+  .sub-popup-panel{max-width:100%}
+}
 </style>
 </head>
 <body>
@@ -1607,28 +1651,36 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);padding:64px 24px 28px}
     </div>
   </div>
 
-  <!-- ══ ALERTES IMMOBILIÈRES GRATUITES ══ -->
-  <div class="sub-strip">
-    <div class="sub-inner">
-      <div class="sub-badge">🔔 Alertes immobilières gratuites</div>
-      <h2>Recevez les nouvelles annonces<br><span>directement sur WhatsApp & Email</span></h2>
-      <p>Abonnez-vous gratuitement et soyez le premier alerté dès qu'un nouveau bien correspondant à vos critères est publié.</p>
-      <div class="sub-form" id="sub-form">
-        <input class="sub-input" id="sub-name"  type="text"  placeholder="👤 Votre prénom">
-        <input class="sub-input" id="sub-phone" type="tel"   placeholder="📱 Votre WhatsApp (+225...)">
-        <input class="sub-input" id="sub-email" type="email" placeholder="✉️ Votre email (optionnel)">
-        <button class="sub-btn" onclick="sAbonner()">🔔 S'abonner gratuitement</button>
+  <!-- ══ ALERTES IMMOBILIÈRES GRATUITES (popup carre a droite) ══ -->
+  <div class="sub-popup-overlay" id="sub-popup-overlay" onclick="if(event.target===this) closeSubPopup()">
+    <div class="sub-popup-panel">
+      <button class="sub-popup-close" onclick="closeSubPopup()" title="Fermer">✕</button>
+      <div class="sub-strip">
+        <div class="sub-inner">
+          <div class="sub-badge">🔔 Alertes immobilières gratuites</div>
+          <h2>Recevez les nouvelles annonces<br><span>directement sur WhatsApp & Email</span></h2>
+          <p>Abonnez-vous gratuitement et soyez le premier alerté dès qu'un nouveau bien correspondant à vos critères est publié.</p>
+          <div class="sub-form" id="sub-form">
+            <input class="sub-input" id="sub-name"  type="text"  placeholder="👤 Votre prénom">
+            <input class="sub-input" id="sub-phone" type="tel"   placeholder="📱 Votre WhatsApp (+225...)">
+            <input class="sub-input" id="sub-email" type="email" placeholder="✉️ Votre email (optionnel)">
+            <button class="sub-btn" onclick="sAbonner()">🔔 S'abonner gratuitement</button>
+          </div>
+          <div class="sub-chips" id="sub-chips">
+            <span class="sub-chip on" data-type="all">Tous les biens</span>
+            <span class="sub-chip" data-type="appartement">Appartements</span>
+            <span class="sub-chip" data-type="magasin">Magasins</span>
+            <span class="sub-chip" data-type="terrain">Terrains</span>
+            <span class="sub-chip" data-type="residence">Résidences</span>
+          </div>
+          <div class="sub-count">🔔 Déjà <strong id="sub-counter">0</strong> abonné(s) aux alertes</div>
+        </div>
       </div>
-      <div class="sub-chips" id="sub-chips">
-        <span class="sub-chip on" data-type="all">🏠 Tous les biens</span>
-        <span class="sub-chip" data-type="appartement">🏢 Appartements</span>
-        <span class="sub-chip" data-type="magasin">🏪 Magasins</span>
-        <span class="sub-chip" data-type="terrain">🌿 Terrains</span>
-        <span class="sub-chip" data-type="residence">🏡 Résidences</span>
-      </div>
-      <div class="sub-count">🔔 Déjà <strong id="sub-counter">0</strong> abonné(s) aux alertes</div>
     </div>
   </div>
+
+  <!-- Bouton flottant pour rouvrir les alertes -->
+  <button class="sub-fab" id="sub-fab" onclick="openSubPopup()" title="Alertes immobilières gratuites">🔔</button>
 
   <!-- POURQUOI NOUS -->
   <div style="background:var(--navy);padding:72px 24px;margin-top:0">
@@ -5348,8 +5400,20 @@ async function loadAbonnesCounter(){
   try{
     let list = [];
     if(FB_CONFIGURED && db){
-      const snap = await db.collection('abonnes').get();
-      list = snap.docs.map(d=>d.data());
+      if(isAdminLogged){
+        /* Admin connecte : liste complete (autorisee par les regles Firestore) */
+        const snap = await db.collection('abonnes').get();
+        list = snap.docs.map(d=>({id:d.id, ...d.data()}));
+      } else {
+        /* Visiteur public : uniquement le compteur, jamais la liste (vie privee des abonnes) */
+        try{
+          const statDoc = await db.collection('stats').doc('abonnes').get();
+          const n = statDoc.exists ? (statDoc.data().count||0) : 0;
+          const counter = document.getElementById('sub-counter');
+          if(counter) counter.textContent = n;
+        }catch(e){}
+        return [];
+      }
     } else {
       const data = await idbGet(ABONNES_IDB_KEY);
       list = data || [];
@@ -5388,14 +5452,22 @@ async function sAbonner(){
 
   try{
     if(FB_CONFIGURED && db){
-      // Vérifier si déjà abonné
-      const existing = await db.collection('abonnes').where('phone','==',phone).get();
-      if(!existing.empty){
+      // Verifier si deja abonne (lecture d'un seul document connu, pas de liste -> autorise publiquement)
+      const phoneId = phone.replace(/\D/g,'');
+      const docRef = db.collection('abonnes').doc(phoneId);
+      const existing = await docRef.get();
+      if(existing.exists){
         toast('ℹ️ Ce numéro est déjà abonné aux alertes.','');
         if(btn){ btn.disabled=false; btn.textContent='🔔 S\'abonner gratuitement'; }
         return;
       }
-      await db.collection('abonnes').add(abonne);
+      await docRef.set(abonne);
+      // Incrementer le compteur public (document dedie, sans exposer la liste)
+      try{
+        await db.collection('stats').doc('abonnes').set(
+          { count: firebase.firestore.FieldValue.increment(1) }, { merge:true }
+        );
+      }catch(e){}
     } else {
       const list = await loadAbonnesCounter();
       const exists = list.find(a=>a.phone===phone);
@@ -6753,6 +6825,48 @@ setInterval(updateFbStatusBadge, 3000);
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', updateFbStatusBadge);
 } else { updateFbStatusBadge(); }
+
+
+
+/* ============================================
+   POPUP ALERTES IMMOBILIERES (carre, ancre a droite)
+============================================ */
+function openSubPopup(){
+  const ov = document.getElementById('sub-popup-overlay');
+  const fab = document.getElementById('sub-fab');
+  if(!ov) return;
+  ov.classList.add('open');
+  if(fab) fab.classList.add('hide');
+  document.body.style.overflow = 'hidden';
+}
+function closeSubPopup(){
+  const ov = document.getElementById('sub-popup-overlay');
+  const fab = document.getElementById('sub-fab');
+  if(!ov) return;
+  ov.classList.remove('open');
+  if(fab) fab.classList.remove('hide');
+  document.body.style.overflow = '';
+  try{ sessionStorage.setItem('sub_popup_seen', '1'); }catch(e){}
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    const ov = document.getElementById('sub-popup-overlay');
+    if(ov && ov.classList.contains('open')) closeSubPopup();
+  }
+});
+
+/* Ouverture automatique une seule fois par session, apres un court delai */
+(function(){
+  let already = false;
+  try{ already = sessionStorage.getItem('sub_popup_seen') === '1'; }catch(e){}
+  if(!already){
+    setTimeout(()=>{
+      /* N'ouvre pas si un autre modal est deja actif (connexion, etc.) */
+      const autreModalOuvert = document.querySelector('.modal.open, .modal-overlay.open');
+      if(!autreModalOuvert) openSubPopup();
+    }, 6000);
+  }
+})();
 
 </script>
 </body>
